@@ -1,8 +1,8 @@
 {
   "name": "strobj",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "string to object, object to string, dot notation",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "npm": {
     "esModules": true
   },

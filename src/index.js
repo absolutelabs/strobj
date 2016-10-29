@@ -88,7 +88,6 @@ class StringToObject {
   }
 }
 
-
 export default {
   StringToObject
 }
