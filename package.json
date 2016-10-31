@@ -1,6 +1,6 @@
 {
   "name": "strobj",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "string to object, object to string, dot notation",
   "main": "lib/index.js",
   "npm": {

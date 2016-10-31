@@ -1,4 +1,43 @@
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// @TODO: optimize, is hot code
+// @TODO: document process a little better
+// @TODO: examples
+
+/**
+ * Simple is object check.
+ * @param item
+ * @returns {boolean}
+ */
+function isObject(item) {
+  return item && (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && !Array.isArray(item);
+}
+
+/**
+ * Deep merge two objects.
+ * @param {object} target
+ * @param {object} source
+ * @return {object} with properties from target & source
+ */
+function mergeDeep(target, source) {
+  if (isObject(target) && isObject(source)) {
+    for (var key in source) {
+      if (isObject(source[key])) {
+        var _Object$assign;
+
+        if (!target[key]) Object.assign(target, (_Object$assign = {}, _Object$assign[key] = {}, _Object$assign));
+        mergeDeep(target[key], source[key]);
+      } else {
+        var _Object$assign2;
+
+        Object.assign(target, (_Object$assign2 = {}, _Object$assign2[key] = source[key], _Object$assign2));
+      }
+    }
+  }
+  return target;
+}
 
 var StringToObject = function () {
   /**
@@ -13,6 +52,8 @@ var StringToObject = function () {
   }
 
   /**
+   * @TODO: would be nice to not have to call a fn + loop inside a loop
+   *
    * @param  {String} subpath
    * @param  {object} pathsAsObj
    * @return {object}
@@ -21,10 +62,14 @@ var StringToObject = function () {
 
   StringToObject.prototype.propFromString = function propFromString(subpath, pathsAsObj) {
     if (!subpath.includes('.')) return pathsAsObj[subpath];
+
     var prev = void 0;
-    subpath.split('.').forEach(function (prop) {
-      if (prev) prev = prev[prop];else prev = pathsAsObj[prop];
-    });
+    var subpaths = subpath.split('.');
+    for (var i = 0; i < subpaths.length; i++) {
+      // subpaths[i] === property
+      if (prev) prev = prev[subpaths[i]];else prev = pathsAsObj[subpaths[i]];
+    }
+
     return prev;
   };
 
@@ -56,18 +101,22 @@ var StringToObject = function () {
       return pathsAsObj;
     }
 
+    // optimization could be done here with prev
     var pathsToObj = path.split('.');
     var currentPosition = '';
     var prev = null;
     for (var i = 0; i < pathsToObj.length; i++) {
       if (prev) {
+        // equals itself, or new obj
         this.propFromString(currentPosition, pathsAsObj)[pathsToObj[i]] = {};
-        prev = pathsToObj[i];
-        currentPosition += '.' + prev;
+
+        // @NOTE: made this one line
+        currentPosition += '.' + (prev = pathsToObj[i]);
       } else {
         pathsAsObj[pathsToObj[i]] = {};
-        prev = pathsToObj[i];
-        currentPosition += prev;
+
+        // @NOTE: made this one line
+        currentPosition += prev = pathsToObj[i];
       }
     }
 
@@ -76,23 +125,26 @@ var StringToObject = function () {
   };
 
   /**
+   * @see mergeDeep
    * @return {object} string as object
    */
 
 
   StringToObject.prototype.getObject = function getObject() {
     return this.objects.reduce(function (a, b) {
-      return Object.assign(a, b);
+      return mergeDeep(a, b);
     });
   };
 
   /**
    * resets this.objects
+   * @chainable
    */
 
 
   StringToObject.prototype.reset = function reset() {
     this.objects = [];
+    return this;
   };
 
   return StringToObject;
